@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.recipeapp.R
+import com.example.recipeapp.navigation.Routes
 
 @Composable
-fun WelcomeScreen(navController: NavController
-) {
+fun WelcomeScreen(navController: NavController) {
     Scaffold(
         bottomBar = {
             Button(
@@ -39,7 +39,9 @@ fun WelcomeScreen(navController: NavController
                     .padding(horizontal = 20.dp)
                     .padding(bottom = 60.dp),
                 onClick = {
-                    navController.navigate(route= "HomeScreen")
+                    navController.navigate(
+                        Routes.Home
+                    )
 
                 },
                 colors = ButtonColors(
@@ -51,7 +53,7 @@ fun WelcomeScreen(navController: NavController
                 shape = RoundedCornerShape(15.dp),
                 contentPadding = PaddingValues(vertical = 18.dp)
             ) {
-                Text("CLick Here")
+                Text("Let's Go")
             }
         }
     ) { paddingValues ->
@@ -107,7 +109,7 @@ fun WelcomeScreen(navController: NavController
                     )
 
                     Text(
-                        text = "De Chef is a user-friendly recipe app designed for those who are new to cooking and want to try new recipes at home",
+                        text = "This App is a user-friendly recipe app designed for those who are new to cooking and want to try new recipes at home",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Light,
                         color = Color.White,
@@ -116,7 +118,6 @@ fun WelcomeScreen(navController: NavController
                     )
 
                 }
-
             }
         }
     }

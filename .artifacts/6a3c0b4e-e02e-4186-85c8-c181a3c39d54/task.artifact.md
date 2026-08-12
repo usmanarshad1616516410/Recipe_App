@@ -1,0 +1,11 @@
+- [x] Add package declaration to `Meal.kt`
+- [x] Update `MealRepository.kt` interface types
+- [x] Update `RecipeApi.kt` interface types
+- [x] Update `MealRepositoryImpl.kt` with correct types and implementation
+- [x] Fix `Meal` import in `Mapper.kt`
+- [x] Update `Routes.kt` Detail parameter type
+- [x] Update `NavHost.kt` DetailScreen navigation logic
+- [x] Update `HomeScreen.kt` navigation calls
+- [x] Update `DetailScreen.kt` parameter types
+- [x] Update `DetailViewModel.kt` parameter types
+- [x] Verify build

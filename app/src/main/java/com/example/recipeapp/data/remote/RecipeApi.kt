@@ -2,11 +2,12 @@ package com.example.recipeapp.data.remote
 
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.Path
 
 interface RecipeApi {
     @GET("recipes/search")
-    suspend fun getRecipe(
-        @Query("q") search : String
-    ): Response<MyResponse>
+    suspend fun getRecipe(): Response<RecipeResponse>
+
+    @GET("recipes/{id}")
+    suspend fun getRecipeById(@Path("id") id: String): Response<RecipeDto>
 }

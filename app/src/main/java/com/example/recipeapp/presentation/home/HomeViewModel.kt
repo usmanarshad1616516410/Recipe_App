@@ -1,95 +1,70 @@
 package com.example.recipeapp.presentation.home
 
 import androidx.lifecycle.ViewModel
-import com.example.recipeapp.data.remote.Recipe
+import androidx.lifecycle.viewModelScope
+import com.example.recipeapp.domain.repsitory.MealRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-
-class HomeViewModel : ViewModel() {
-
-    val dummyRecipeForYou = Recipe(
-        id = 1,
-        image = "https://cdn.dummyjson.com/recipe-images/1.webp", //  image link
-        name = "Neapolitan Margherita Pizza",
-        ingredients = listOf(
-            "Pizza Dough",
-            "San Marzano Tomatoes",
-            "Fresh Mozzarella",
-            "Basil Leaves",
-            "Olive Oil"
-        ),
-        instructions = listOf(
-            "Roll out dough",
-            "Spread tomato sauce",
-            "Add mozzarella and basil",
-            "Bake at high heat"
-        )
-    )
-    val dummyTrendingList = listOf(
-        Recipe(
-            id = 2,
-            name = "Classic Lasagna",
-            image = "https://cdn.dummyjson.com/recipe-images/1.webp",
-            ingredients = listOf(
-                "Pizza Dough",
-                "San Marzano Tomatoes",
-                "Fresh Mozzarella",
-                "Basil Leaves",
-                "Olive Oil"
-            ),
-            instructions = listOf(
-                "Roll out dough",
-                "Spread tomato sauce",
-                "Add mozzarella and basil",
-                "Bake at high heat"
-            )
-        ),
-        Recipe(
-            id = 3,
-            name = "Chocolate Brownie",
-            image = "https://cdn.dummyjson.com/recipe-images/1.webp",
-            ingredients = listOf(
-                "Pizza Dough",
-                "San Marzano Tomatoes",
-                "Fresh Mozzarella",
-                "Basil Leaves",
-                "Olive Oil"
-            ),
-            instructions = listOf(
-                "Roll out dough",
-                "Spread tomato sauce",
-                "Add mozzarella and basil",
-                "Bake at high heat"
-            )
-        ),
-        Recipe(
-            id = 4,
-            name = "Chicken Caesar Salad",
-            image = "https://cdn.dummyjson.com/recipe-images/1.webp",
-            ingredients = listOf(
-                "Pizza Dough",
-                "San Marzano Tomatoes",
-                "Fresh Mozzarella",
-                "Basil Leaves",
-                "Olive Oil"
-            ),
-            instructions = listOf(
-                "Roll out dough",
-                "Spread tomato sauce",
-                "Add mozzarella and basil",
-                "Bake at high heat"
-            )
-        )
-    )
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
-    private val _state = MutableStateFlow(
-        HomeState(
-            searchTitle = "",
-            forYouRecipe = dummyRecipeForYou,
-            trendingRecipes = dummyTrendingList
-        )
-    )
+class HomeViewModel(
+    private val repository: MealRepository
+) : ViewModel() {
+    private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
+    private val _effects = MutableSharedFlow<HomeEffects>()
+    val effects = _effects.asSharedFlow()
 
+
+    fun onIntent(intent: HomeIntent) {
+        when (intent) {
+            is HomeIntent.SearchUpdate -> {
+                _state.update {
+                    it.copy(searchQueryFlow = intent.query)
+                }
+            }
+
+            is HomeIntent.SearchRecipe -> {
+                getMealByName(intent.recipeName)
+            }
+
+            is HomeIntent.ItemClick -> {}
+        }
+    }
+
+    init {
+        loadMeals()
+    }
+    private fun getMealByName(recipeName: String) {
+        val recipe = recipeName.lowercase()
+        val searchedRecipe = state.value.trendingRecipes.firstOrNull { meal ->
+            meal.name.lowercase() == recipe
+        }
+
+        viewModelScope.launch {
+            _effects.emit(HomeEffects.NavigateToDetailScreen(searchedRecipe))
+        }
+
+    }
+
+    private fun loadMeals() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(isLoading = true, error = null)
+            }
+            try {
+                val meals = repository.getMeals()
+
+                _state.update { it.copy(trendingRecipes = meals ?: emptyList(), isLoading = false) }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(isLoading = false, error = e.message ?: "Something went wrong")
+                }
+            }
+        }
+    }
 }

@@ -1,4 +1,6 @@
 package com.example.recipeapp.presentation.details
 
-class DetailIntent {
+sealed interface DetailIntent {
+    data class LoadRecipe(val id: String) : DetailIntent
+    data class IngredientClick(val index: Int) : DetailIntent
 }

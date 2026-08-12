@@ -1,14 +1,20 @@
 package com.example.recipeapp.data.mapper
 
-import com.example.recipeapp.data.remote.Recipe
 import com.example.recipeapp.domain.model.Meal
-fun Recipe.toDomain(): Meal {
+import com.example.recipeapp.data.remote.RecipeDto
+import com.example.recipeapp.data.remote.RecipeResponse
+fun RecipeDto.toDomain(): Meal {
     return Meal(
         id = this.id.toString(),
         name = this.name,
-        thumbnailUrl = this.image
+        thumbnailUrl = this.image,
+        ingredients =this.ingredients,
+        instructions = this.instructions
     )
 }
-fun List<Recipe>.toDomainList(): List<Meal> {
-    return this.map { it.toDomain() }
+
+fun RecipeResponse.toDomainList(): List<Meal> {
+    return this.recipes.map { recipeDto ->
+        recipeDto.toDomain()
+    }
 }

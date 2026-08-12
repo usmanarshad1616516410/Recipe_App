@@ -1,7 +1,6 @@
 package com.example.recipeapp.presentation.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,21 +15,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,23 +38,54 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import coil3.compose.rememberAsyncImagePainter
-import com.example.recipeapp.R
-import com.example.recipeapp.presentation.welcome.Rotes.WelcomeScreen.route
+import coil3.compose.AsyncImage
+import com.example.recipeapp.navigation.Routes
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-               viewModel: HomeViewModel = koinViewModel()
-) {
+    viewModel: HomeViewModel = koinViewModel(),
 
+    ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val featuredMeal = remember(state.trendingRecipes) {
+        state.trendingRecipes.randomOrNull()
+    }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(viewModel.effects) {
+        viewModel.effects.collect {
+            when (it) {
+                is HomeEffects.NavigateToDetailScreen -> {
+                    it.recipe?.let { meal ->
+                        navController.navigate(Routes.Detail(meal.id))
+                    } ?: run {
+                        Toast.makeText(context, "No such recipe right now", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            }
+
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color.LightGray
     ) { paddingValues ->
-        var value by remember { mutableStateOf("") }
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -67,7 +98,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(paddingValues)
                     .padding(top = 50.dp),
-                color = Color.Blue,
+                color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
                 textAlign = TextAlign.Center,
@@ -78,10 +109,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                value = value,
-                onValueChange = { change ->
-                    value = change
-                },
+                value = state.searchQueryFlow,
+                onValueChange = { viewModel.onIntent(HomeIntent.SearchUpdate(it)) },
                 placeholder = {
                     Text("Search any Recipe")
                 },
@@ -90,12 +119,28 @@ fun HomeScreen(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent
-                )
+                ),
+                trailingIcon = {
+                    IconButton(onClick = {
+                        viewModel.onIntent(
+                            intent = HomeIntent.SearchRecipe(
+                                state.searchQueryFlow
+                            )
+                        )
+                    }) {
+                        Icon(
+                            painter = painterResource(
+                                android.R.drawable.ic_menu_search
+                            ), contentDescription = null
+                        )
+                    }
+                }
+
             )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(30.dp)
+                    .padding(20.dp)
             ) {
                 Text(
                     text = "Just For You",
@@ -104,40 +149,37 @@ fun HomeScreen(
                 )
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(vertical = 30.dp)
                 ) {
-                    Image(
+                    AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(shape = RoundedCornerShape(20.dp)),
-                        painter = painterResource(R.drawable.card),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .align(Alignment.Center)
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.Black.copy(alpha = 0.6f),
-                                        Color.Black
-                                    )
+                            .clickable {
+                                navController.navigate(
+                                    Routes.Detail(recipeId = featuredMeal?.id ?: "")
                                 )
-                            )
+                            }
+                            .clip(shape = RoundedCornerShape(10.dp)),
+                        model = featuredMeal?.thumbnailUrl,
+                        contentDescription = null,
 
+                        )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxSize(0.6f)
+                            .align(Alignment.BottomCenter)
                     )
 
                     Text(
-                        text = " best pasta recipes from chef John",
+                        text = featuredMeal?.name ?: String(),
                         color = Color.White,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
+                            .align(Alignment.BottomCenter)
                             .padding(20.dp)
                     )
-
                 }
             }
 
@@ -149,27 +191,27 @@ fun HomeScreen(
                     text = "Trending Recipes",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 15.dp)
+                    modifier = Modifier.padding(horizontal = 25.dp)
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             LazyRow(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
             ) {
-                items(
-                    items = state.trendingRecipes
-                ) { item ->
-
-                    Image(
-                        painter = rememberAsyncImagePainter(item.image),
+                items(items = state.trendingRecipes) { item ->
+                    AsyncImage(
                         contentDescription = null,
-                        modifier = Modifier.clickable{
-                            navController.navigate("detail/${item.id}")
-                        }
-                            .padding(7.dp)
+                        model = item.thumbnailUrl,
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp, vertical = 20.dp)
                             .size(210.dp)
+                            .clip(shape = RoundedCornerShape(10.dp))
                             .clickable {
-                                navController.navigate(route)
+                                navController.navigate(
+                                    Routes.Detail(recipeId = item.id)
+                                )
                             }
                     )
                 }
@@ -178,4 +220,7 @@ fun HomeScreen(
     }
 
 }
+
+
+
 
