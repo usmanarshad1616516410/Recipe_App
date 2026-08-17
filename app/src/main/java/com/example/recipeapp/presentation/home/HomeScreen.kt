@@ -161,7 +161,7 @@ fun HomeScreen(
                                 )
                             }
                             .clip(shape = RoundedCornerShape(10.dp)),
-                        model = featuredMeal?.thumbnailUrl,
+                        model = featuredMeal?.imageUrl,
                         contentDescription = null,
 
                         )
@@ -203,7 +203,7 @@ fun HomeScreen(
                 items(items = state.trendingRecipes) { item ->
                     AsyncImage(
                         contentDescription = null,
-                        model = item.thumbnailUrl,
+                        model = item.imageUrl,
                         modifier = Modifier
                             .padding(horizontal = 10.dp, vertical = 20.dp)
                             .size(210.dp)

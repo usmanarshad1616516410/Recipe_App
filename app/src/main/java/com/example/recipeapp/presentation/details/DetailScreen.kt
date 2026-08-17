@@ -34,7 +34,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun DetailScreen(
     recipeId: String,
-    viewModel: DetailViewModel = koinViewModel()
+    viewModel: DetailViewModel = koinViewModel() 
 ) {
 
     val state by viewModel.state.collectAsState()
@@ -48,7 +48,7 @@ fun DetailScreen(
         state.meal?.let { meal ->
             AsyncImage(
                 contentDescription = null,
-                model = meal.thumbnailUrl,
+                model = meal.imageUrl,
                 modifier = Modifier.fillMaxSize(),
                 alignment = Alignment.TopCenter
             )

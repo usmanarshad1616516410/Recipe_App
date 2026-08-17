@@ -14,7 +14,7 @@ val appModule = module {
         get<Retrofit>().create(RecipeApi::class.java)
     }
     single<MealRepository> { MealRepositoryImpl(get()) }
-    viewModel{
+    viewModel {
         HomeViewModel(get())
     }
     viewModel {

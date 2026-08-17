@@ -7,7 +7,7 @@ fun RecipeDto.toDomain(): Meal {
     return Meal(
         id = this.id.toString(),
         name = this.name,
-        thumbnailUrl = this.image,
+        imageUrl = this.image,
         ingredients =this.ingredients,
         instructions = this.instructions
     )
