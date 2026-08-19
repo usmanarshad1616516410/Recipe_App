@@ -22,7 +22,7 @@ fun NavigationStack() {
         }
         composable<Routes.Home> {
             HomeScreen(
-               navController
+           navController
             )
         }
         composable<Routes.Detail> { backStackEntry ->

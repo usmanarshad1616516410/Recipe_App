@@ -57,9 +57,9 @@ class HomeViewModel(
                 it.copy(isLoading = true, error = null)
             }
             try {
-                val meals = repository.getMeals()
+                val responses = repository.responses()
 
-                _state.update { it.copy(trendingRecipes = meals ?: emptyList(), isLoading = false) }
+                _state.update { it.copy(trendingRecipes = responses ?: emptyList(), isLoading = false) }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(isLoading = false, error = e.message ?: "Something went wrong")

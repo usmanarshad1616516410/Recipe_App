@@ -50,7 +50,7 @@ fun HomeScreen(
     ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val featuredMeal = remember(state.trendingRecipes) {
+    val response = remember(state.trendingRecipes) {
         state.trendingRecipes.randomOrNull()
     }
 
@@ -60,8 +60,8 @@ fun HomeScreen(
         viewModel.effects.collect {
             when (it) {
                 is HomeEffects.NavigateToDetailScreen -> {
-                    it.recipe?.let { meal ->
-                        navController.navigate(Routes.Detail(meal.id))
+                    it.recipe?.let { response ->
+                        navController.navigate(Routes.Detail(response.id))
                     } ?: run {
                         Toast.makeText(context, "No such recipe right now", Toast.LENGTH_SHORT)
                             .show()
@@ -158,11 +158,11 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .clickable {
                                 navController.navigate(
-                                    Routes.Detail(recipeId = featuredMeal?.id ?: "")
+                                    Routes.Detail(recipeId = response?.id ?: "")
                                 )
                             }
                             .clip(shape = RoundedCornerShape(10.dp)),
-                        model = featuredMeal?.imageUrl,
+                        model = response?.imageUrl,
                         contentDescription = null,
 
                         )
@@ -174,7 +174,7 @@ fun HomeScreen(
                     )
 
                     Text(
-                        text = featuredMeal?.name ?: String(),
+                        text = response?.name ?: String(),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
@@ -213,6 +213,7 @@ fun HomeScreen(
                                 navController.navigate (
                                     Routes.Detail(recipeId = item.id)
                                 )
+
                             }
                     )
                 }

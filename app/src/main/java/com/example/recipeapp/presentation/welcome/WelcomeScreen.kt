@@ -41,8 +41,11 @@ fun WelcomeScreen(navController: NavController) {
                 onClick = {
                     navController.navigate(
                         Routes.Home
-                    )
-
+                    ){
+                        popUpTo(Routes.Welcome) {
+                            inclusive=true
+                        }
+                    }
                 },
                 colors = ButtonColors(
                     containerColor = Color(0xFF25AE87),

@@ -10,7 +10,7 @@ class ResponseRepositoryImpl(
     private val api: RecipeApi,
 ) : ResponseRepository {
 
-    override suspend fun getMeals(): List<Response>? {
+    override suspend fun responses(): List<Response>? {
         val response = api.getRecipe()
         return response.body()?.recipes?.toDomainList()
     }
