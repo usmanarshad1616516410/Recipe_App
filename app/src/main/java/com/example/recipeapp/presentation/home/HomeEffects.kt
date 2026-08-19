@@ -1,7 +1,7 @@
 package com.example.recipeapp.presentation.home
 
-import com.example.recipeapp.domain.model.Meal
+import com.example.recipeapp.domain.model.Response
 
 sealed interface HomeEffects {
-    data class NavigateToDetailScreen(val recipe: Meal?): HomeEffects
+    data class NavigateToDetailScreen(val recipe: Response?): HomeEffects
 }

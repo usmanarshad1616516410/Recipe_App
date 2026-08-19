@@ -20,22 +20,16 @@ fun NavigationStack() {
                 navController
             )
         }
-
         composable<Routes.Home> {
-
             HomeScreen(
-                navController
+               navController
             )
-
         }
         composable<Routes.Detail> { backStackEntry ->
-
             val route = backStackEntry.toRoute<Routes.Detail>()
-
             DetailScreen(
                 recipeId = route.recipeId
             )
-
         }
     }
 }

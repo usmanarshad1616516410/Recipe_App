@@ -2,7 +2,7 @@ package com.example.recipeapp.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.recipeapp.domain.repsitory.MealRepository
+import com.example.recipeapp.domain.repsitory.ResponseRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 
 class HomeViewModel(
-    private val repository: MealRepository
+    private val repository: ResponseRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()

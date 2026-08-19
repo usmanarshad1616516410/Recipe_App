@@ -1,8 +1,8 @@
 package com.example.recipeapp.di
 
 import com.example.recipeapp.data.remote.RecipeApi
-import com.example.recipeapp.data.repository.MealRepositoryImpl
-import com.example.recipeapp.domain.repsitory.MealRepository
+import com.example.recipeapp.data.repository.ResponseRepositoryImpl
+import com.example.recipeapp.domain.repsitory.ResponseRepository
 import com.example.recipeapp.presentation.details.DetailViewModel
 import com.example.recipeapp.presentation.home.HomeViewModel
 import org.koin.core.module.dsl.viewModel
@@ -13,7 +13,7 @@ val appModule = module {
     single<RecipeApi> {
         get<Retrofit>().create(RecipeApi::class.java)
     }
-    single<MealRepository> { MealRepositoryImpl(get()) }
+    single<ResponseRepository> { ResponseRepositoryImpl(get()) }
     viewModel {
         HomeViewModel(get())
     }

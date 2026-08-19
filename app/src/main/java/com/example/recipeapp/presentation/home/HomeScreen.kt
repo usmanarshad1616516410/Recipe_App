@@ -37,14 +37,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.recipeapp.navigation.Routes
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
+    navController: NavHostController,
     viewModel: HomeViewModel = koinViewModel(),
 
     ) {
@@ -110,6 +110,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 value = state.searchQueryFlow,
+                maxLines = 1,
                 onValueChange = { viewModel.onIntent(HomeIntent.SearchUpdate(it)) },
                 placeholder = {
                     Text("Search any Recipe")
@@ -209,7 +210,7 @@ fun HomeScreen(
                             .size(210.dp)
                             .clip(shape = RoundedCornerShape(10.dp))
                             .clickable {
-                                navController.navigate(
+                                navController.navigate (
                                     Routes.Detail(recipeId = item.id)
                                 )
                             }
@@ -220,7 +221,3 @@ fun HomeScreen(
     }
 
 }
-
-
-
-

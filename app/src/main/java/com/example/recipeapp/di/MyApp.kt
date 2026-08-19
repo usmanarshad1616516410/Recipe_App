@@ -1,16 +1,13 @@
-package com.example.recipeapp
+package com.example.recipeapp.di
 
 import android.app.Application
-import com.example.recipeapp.di.appModule
-import com.example.recipeapp.di.networkModule
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.GlobalContext.startKoin
-
+import org.koin.core.context.GlobalContext
 
 class MyApp: Application() {
     override fun onCreate() {
         super.onCreate()
-        startKoin {
+        GlobalContext.startKoin {
             androidContext(this@MyApp)
             modules(appModule, networkModule)
         }

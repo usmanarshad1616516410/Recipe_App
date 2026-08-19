@@ -2,14 +2,14 @@ package com.example.recipeapp.presentation.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.recipeapp.domain.repsitory.MealRepository
+import com.example.recipeapp.domain.repsitory.ResponseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DetailViewModel(
-    private val repository: MealRepository
+    private val repository: ResponseRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DetailState())
@@ -21,7 +21,6 @@ class DetailViewModel(
             is DetailIntent.IngredientClick -> onIngredientClick(intent.index)
         }
     }
-
     private fun loadRecipe(id: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }

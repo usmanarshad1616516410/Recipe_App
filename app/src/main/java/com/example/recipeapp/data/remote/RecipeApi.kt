@@ -6,8 +6,10 @@ import retrofit2.http.Path
 
 interface RecipeApi {
     @GET("recipes/search")
-    suspend fun getRecipe(): Response<RecipeResponse>
+    suspend fun getRecipe(): Response<RecipeListDto>
 
     @GET("recipes/{id}")
     suspend fun getRecipeById(@Path("id") id: String): Response<RecipeDto>
 }
+
+

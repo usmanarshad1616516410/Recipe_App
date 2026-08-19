@@ -1,10 +1,6 @@
 package com.example.recipeapp.data.remote
-data class RecipeResponse(
-    val recipes: List<RecipeDto>,
-    val total: Int,
-    val skip: Int,
-    val limit: Int
-)
+
+import com.example.recipeapp.domain.model.Response
 
 data class RecipeDto(
     val id: Int,
@@ -14,3 +10,20 @@ data class RecipeDto(
     val image: String
 )
 
+data class RecipeListDto(
+    val recipes: List<RecipeDto>
+)
+
+fun RecipeDto.toDomain(): Response {
+    return Response(
+        id = this.id.toString(),
+        name = this.name,
+        imageUrl = this.image,
+        ingredients = this.ingredients,
+        instructions = this.instructions
+    )
+}
+
+fun List<RecipeDto>.toDomainList(): List<Response> {
+    return this.map { it.toDomain() }
+}
