@@ -7,63 +7,106 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 
 class HomeViewModel(
     private val repository: ResponseRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
-    val state = _state.asStateFlow()
+    var state = _state.asStateFlow()
     private val _effects = MutableSharedFlow<HomeEffects>()
-    val effects = _effects.asSharedFlow()
+    var effects = _effects.asSharedFlow()
 
+    init {
+        fetchRecipes()
+    }
 
     fun onIntent(intent: HomeIntent) {
+
         when (intent) {
+
             is HomeIntent.SearchUpdate -> {
-                _state.update {
-                    it.copy(searchQueryFlow = intent.query)
-                }
+
+                val filteredRecipes =
+                    if (intent.query.isBlank()) {
+                        state.value.allRecipes
+                    } else {
+                        state.value.allRecipes.filter { recipe ->
+                            recipe.title.contains(
+                                intent.query,
+                                ignoreCase = true
+                            )
+                        }
+                    }
+
+                _state.value = state.value.copy(
+                    searchQueryFlow = intent.query,
+                    trendingRecipes = filteredRecipes,
+                    isSearching = intent.query.isNotBlank()
+                )
             }
 
             is HomeIntent.SearchRecipe -> {
-                getMealByName(intent.recipeName)
+                getRecipeByName(intent.recipeName)
             }
 
-            is HomeIntent.ItemClick -> {}
-        }
-    }
+            is HomeIntent.ItemClick -> {
 
-    init {
-        loadMeals()
-    }
-    private fun getMealByName(recipeName: String) {
-        val recipe = recipeName.lowercase()
-        val searchedRecipe = state.value.trendingRecipes.firstOrNull { meal ->
-            meal.name.lowercase() == recipe
-        }
-
-        viewModelScope.launch {
-            _effects.emit(HomeEffects.NavigateToDetailScreen(searchedRecipe))
-        }
-
-    }
-
-    private fun loadMeals() {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(isLoading = true, error = null)
-            }
-            try {
-                val responses = repository.responses()
-
-                _state.update { it.copy(trendingRecipes = responses ?: emptyList(), isLoading = false) }
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isLoading = false, error = e.message ?: "Something went wrong")
+                val recipe = state.value.allRecipes.firstOrNull {
+                    it.id == intent.responseId
                 }
+
+                viewModelScope.launch {
+                    _effects.emit(
+                        HomeEffects.NavigateToDetailScreen(recipe)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun getRecipeByName(recipeName: String) {
+
+        val recipe = state.value.allRecipes.firstOrNull {
+            it.title.contains(
+                recipeName,
+                ignoreCase = true
+            )
+        }
+
+        viewModelScope.launch {
+            _effects.emit(
+                HomeEffects.NavigateToDetailScreen(recipe)
+            )
+        }
+    }
+
+    private fun fetchRecipes() {
+
+        viewModelScope.launch {
+
+            _state.value = state.value.copy(
+                isLoading = true,
+                error = null
+            )
+
+            try {
+
+                val responses = repository.responses().orEmpty()
+
+                _state.value = state.value.copy(
+                    allRecipes = responses,
+                    trendingRecipes = responses,
+                    isLoading = false,
+                    error = null
+                )
+
+            } catch (e: Exception) {
+
+                _state.value = state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Something went wrong"
+                )
             }
         }
     }

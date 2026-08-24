@@ -4,6 +4,6 @@ import com.example.recipeapp.domain.model.Response
 
 interface ResponseRepository {
     suspend fun responses(): List<Response>?
-    suspend fun getMealById(id: String): Response?
+    suspend fun getResponseById(id: String): Response?
 
 }

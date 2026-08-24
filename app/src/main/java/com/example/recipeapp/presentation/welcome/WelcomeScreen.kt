@@ -5,13 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,39 +21,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.recipeapp.R
-import com.example.recipeapp.navigation.Routes
+import com.example.recipeapp.shared.components.BaseButton
 
 @Composable
-fun WelcomeScreen(navController: NavController) {
+fun WelcomeScreen(onIntent: (WelcomeIntent) -> Unit) {
     Scaffold(
         bottomBar = {
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 60.dp),
+            BaseButton(
+                text = "Let's Go",
                 onClick = {
-                    navController.navigate(
-                        Routes.Home
-                    ){
-                        popUpTo(Routes.Welcome) {
-                            inclusive=true
-                        }
-                    }
+                    onIntent(WelcomeIntent.GoToHome)
                 },
-                colors = ButtonColors(
-                    containerColor = Color(0xFF25AE87),
-                    contentColor = Color.White,
-                    disabledContentColor = Color.White,
-                    disabledContainerColor = Color(0xFF25AE87)
-                ),
-                shape = RoundedCornerShape(15.dp),
-                contentPadding = PaddingValues(vertical = 18.dp)
-            ) {
-                Text("Let's Go")
-            }
+                backgroundColor = Color(0xFF25AE87),
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 35.dp)
+            )
+
+
         }
     ) { paddingValues ->
         Box(

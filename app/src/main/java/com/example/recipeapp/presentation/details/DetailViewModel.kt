@@ -25,8 +25,8 @@ class DetailViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
-                val meal = repository.getMealById(id)
-                _state.update { it.copy(meal = meal, isLoading = false) }
+                val response = repository.getResponseById(id)
+                _state.update { it.copy(response = response, isLoading = false) }
             } catch (e: Exception) {
                 val message = e.message ?: "Something went wrong"
                 _state.update {

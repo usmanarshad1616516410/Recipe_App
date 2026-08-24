@@ -17,7 +17,7 @@ data class RecipeListDto(
 fun RecipeDto.toDomain(): Response {
     return Response(
         id = this.id.toString(),
-        name = this.name,
+        title = this.name,
         imageUrl = this.image,
         ingredients = this.ingredients,
         instructions = this.instructions
