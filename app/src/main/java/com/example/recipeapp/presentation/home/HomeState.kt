@@ -8,5 +8,7 @@ data class HomeState(
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
     val error: String? = null,
-    val searchQueryFlow: String = ""
+    val searchQueryFlow: String = "",
+    val selectedFoodType: FoodTypes = FoodTypes.ALL
 )
+

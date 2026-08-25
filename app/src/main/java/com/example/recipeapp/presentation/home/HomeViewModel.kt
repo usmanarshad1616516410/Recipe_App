@@ -3,19 +3,22 @@ package com.example.recipeapp.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipeapp.domain.repsitory.ResponseRepository
+import com.example.recipeapp.presentation.home.HomeEffects.NavigateToDetailScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val repository: ResponseRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
-    var state = _state.asStateFlow()
+    val state = _state.asStateFlow()
     private val _effects = MutableSharedFlow<HomeEffects>()
-    var effects = _effects.asSharedFlow()
+    val effects = _effects.asSharedFlow()
+
 
     init {
         fetchRecipes()
@@ -27,17 +30,16 @@ class HomeViewModel(
 
             is HomeIntent.SearchUpdate -> {
 
-                val filteredRecipes =
-                    if (intent.query.isBlank()) {
-                        state.value.allRecipes
-                    } else {
-                        state.value.allRecipes.filter { recipe ->
-                            recipe.title.contains(
-                                intent.query,
-                                ignoreCase = true
-                            )
-                        }
+                val filteredRecipes = if (intent.query.isBlank()) {
+                    state.value.allRecipes
+                } else {
+                    state.value.allRecipes.filter { recipe ->
+                        recipe.title.contains(
+                            intent.query,
+                            ignoreCase = true
+                        )
                     }
+                }
 
                 _state.value = state.value.copy(
                     searchQueryFlow = intent.query,
@@ -58,14 +60,39 @@ class HomeViewModel(
 
                 viewModelScope.launch {
                     _effects.emit(
-                        HomeEffects.NavigateToDetailScreen(recipe)
+                        NavigateToDetailScreen(recipe)
                     )
                 }
+            }
+
+            is HomeIntent.FoodTypeClicked -> {
+
+
+                val filteredRecipes = if (intent.foodType == FoodTypes.ALL) {
+                    state.value.allRecipes
+                } else {
+                    state.value.allRecipes.filter { recipe ->
+                        recipe.title.contains(
+                            intent.foodType.value,
+                            ignoreCase = true
+                        )
+                    }
+                }
+
+                _state.update {
+                    it.copy(
+                        selectedFoodType = intent.foodType,
+                        trendingRecipes = filteredRecipes,
+                    )
+                }
+
             }
         }
     }
 
     private fun getRecipeByName(recipeName: String) {
+
+        if (recipeName.isBlank()) return
 
         val recipe = state.value.allRecipes.firstOrNull {
             it.title.contains(
@@ -94,18 +121,20 @@ class HomeViewModel(
 
                 val responses = repository.responses().orEmpty()
 
-                _state.value = state.value.copy(
-                    allRecipes = responses,
-                    trendingRecipes = responses,
-                    isLoading = false,
-                    error = null
-                )
+                _state.update {
+                    it.copy(
+                        allRecipes = responses,
+                        trendingRecipes = responses,
+                        isLoading = false,
+                        error = null
+                    )
+                }
 
             } catch (e: Exception) {
 
                 _state.value = state.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Something went wrong"
+                    error = e.message ?: "No Internet Connection"
                 )
             }
         }

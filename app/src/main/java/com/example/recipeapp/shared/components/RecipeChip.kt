@@ -9,32 +9,38 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
- fun RecipeChip(
+fun RecipeChip(
     text: String,
-    selected: Boolean,
-    onClick: () -> Unit
+    selected: Boolean = false,
+    isClickable: Boolean = true,
+    shape: Shape = RoundedCornerShape(50.dp),
+    onClick: () -> Unit = {}
 ) {
 
-    Surface(
-        modifier = Modifier.clickable {
+    val isCLickableModifier = if (isClickable) {
+        Modifier.clickable {
             onClick()
-        },
-        shape = RoundedCornerShape(50.dp),
-        color = if (selected) {
-
+        }
+    } else {
+        Modifier
+    }
+    Surface(
+        modifier = Modifier.then(
+            isCLickableModifier
+        ),
+        shape = shape,
+        color = if (selected || isClickable.not()) {
             Color(0xFFE4E8D8)
         } else {
             Color.White
         },
         border = if (!selected) {
-            BorderStroke(
-                1.dp,
-                Color(0xFFE0E0E0)
-            )
+            BorderStroke(1.dp, Color(0xFFE0E0E0))
         } else {
             null
         }

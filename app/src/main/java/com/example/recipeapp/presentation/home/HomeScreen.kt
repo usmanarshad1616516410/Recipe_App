@@ -48,6 +48,9 @@ fun HomeScreen(
     val response = remember(uiState.allRecipes) {
         uiState.allRecipes.randomOrNull()
     }
+    val totalTime =
+        (response?.prepTimeMinutes ?: 0) +
+                (response?.cookTimeMinutes ?: 0)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -100,9 +103,7 @@ fun HomeScreen(
                 trailingIcon = {
                     IconButton(onClick = {
                         onIntent(
-                             HomeIntent.SearchRecipe(
-                                uiState.searchQueryFlow
-                            )
+                            HomeIntent.SearchRecipe(uiState.searchQueryFlow)
                         )
                     }) {
                         Icon(
@@ -119,7 +120,20 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                item {
+                items(FoodTypes.entries){foodType ->
+                    RecipeChip(
+                        text = foodType.value,
+//                        selected = uiState.searchQueryFlow.isBlank(),
+                        selected = foodType ==  uiState.selectedFoodType,
+                        onClick = {
+                            onIntent(
+                                HomeIntent.FoodTypeClicked(foodType)
+                            )
+                        }
+                    )
+                }
+
+               /* item {
                     RecipeChip(
                         text = "All",
                         selected = uiState.searchQueryFlow.isBlank(),
@@ -163,10 +177,10 @@ fun HomeScreen(
                             )
                         }
                     )
-                }
+                }*/
             }
             Spacer(modifier = Modifier.height(26.dp))
-                Column(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
@@ -213,17 +227,38 @@ fun HomeScreen(
                                 )
                             )
                     )
+
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+
+                    ) {
+
+                        Text(
+                            text = "⭐ ${response?.rating}",
+                            color = Color.White,
+                            fontSize = 13.sp
+                        )
+
+                        Text(
+                            text = "🕒 $totalTime min",
+                            color = Color.White,
+                            fontSize = 13.sp
+                        )
+                    }
                     Text(
                         text = response?.title ?: String(),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
+                            .align(Alignment.BottomStart)
                             .padding(20.dp)
                     )
                 }
             }
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -265,6 +300,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
         }
+
     }
 }
 
