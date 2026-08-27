@@ -73,7 +73,6 @@ fun DetailScreen(
             }
 
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                // Calculate 40% of the maximum screen height
                 val topPadding = maxHeight * 0.4f
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -83,27 +82,31 @@ fun DetailScreen(
                     )
                 ) {
 
-                    item {
-                        Text(
-                            text = "⭐ ${response.rating}",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp
-                            )
-                        )
-                    }
 
                     item {
-                        Text(
-                            text = "🕒 $totalTime min",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp,
-                                vertical = 16.dp
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "⭐ ${response.rating}",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp
+                                )
                             )
-                        )
+                            Text(
+                                text = "🕒 $totalTime min",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp,
+                                )
+                            )
+                        }
                     }
 
                     item {
@@ -125,15 +128,17 @@ fun DetailScreen(
                                 verticalAlignment = Alignment.Top
                             ) {
 
-                                Column(modifier = Modifier
-                                    .padding(15.dp)
-                                    .weight(1f)) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .weight(1f)
+                                ) {
 
 
                                     Text(
                                         text = "Meal Type",
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
+                                        fontSize = 30.sp
                                     )
 
                                     Spacer(
@@ -152,104 +157,115 @@ fun DetailScreen(
                                     }
                                 }
 
-                                Spacer(
-                                    modifier = Modifier.height(16.dp)
-                                )
-                                Column(
-                                    modifier = Modifier
-                                        .padding(15.dp)
-                                        .weight(1f),
-
-                                    horizontalAlignment = Alignment.End
-                                )
-
-
-                                {
-                                    Text(
-                                        text = "Tags",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
-                                    )
-
-                                    Spacer(
-                                        modifier = Modifier.height(8.dp),
-                                    )
-
-                                    response.tags.forEach { tag ->
-
-                                        Text(
-                                            text = "#$tag",
-                                            fontSize = 15.sp,
-                                            modifier = Modifier.padding(
-                                                vertical = 3.dp
-                                            )
-                                        )
-                                    }
-                                }
+//                                Spacer(
+//                                    modifier = Modifier.height(16.dp)
+//                                )
+//                                Column(
+//                                    modifier = Modifier
+//                                        .padding(15.dp)
+//                                        .weight(1f),
+//
+//                                    horizontalAlignment = Alignment.End
+//                                )
+//
+//
+//                                {
+//                                    Text(
+//                                        text = "Tags",
+//                                        fontWeight = FontWeight.Bold,
+//                                        fontSize = 20.sp
+//                                    )
+//
+//                                    Spacer(
+//                                        modifier = Modifier.height(8.dp),
+//                                    )
+//
+//                                    response.tags.forEach { tag ->
+//
+//                                        Text(
+//                                            text = "#$tag",
+//                                            fontSize = 15.sp,
+//                                            modifier = Modifier.padding(
+//                                                vertical = 3.dp
+//                                            )
+//                                        )
+//                                    }
+//                                }
                             }
 
                             Spacer(
                                 modifier = Modifier.height(20.dp)
                             )
 
-                            Text(
-                                text = response.title,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 26.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 12.dp)
-                            )
-                            Text(
-                                text = response.instructions.joinToString(" "),
-                                fontSize = 16.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Justify
-                            )
-                            Spacer(
-                                modifier = Modifier.height(20.dp)
-                            )
-                            Text(
-                                text = "Ingredients",
-                                modifier = Modifier.padding(10.dp),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 30.sp
-                            )
+                                Text(
+                                    text = response.title,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 30.sp,
+                                    modifier = Modifier.padding(10.dp)
+                                        .fillMaxWidth()
+                                        .padding(bottom = 12.dp)
+                                )
+                                Text(
+                                    text = response.instructions.joinToString(" "),
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Justify
+                                )
+                                Spacer(
+                                    modifier = Modifier.height(20.dp)
+                                )
+                                Text(
+                                    text = "Ingredients",
+                                    modifier = Modifier.padding(10.dp, bottom = 12.dp),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 30.sp
+                                )
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    response.ingredients.forEach { ingredient ->
+                                        RecipeChip(
+                                            isClickable = false,
+                                            text = ingredient,
+                                        )
+                                    }
+                                }
+                                Spacer(
+                                    modifier = Modifier.height(20.dp)
+                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(15.dp)
+                                )
 
-                            /*   response.ingredients.forEach { ingredient ->
 
-                                   Card(
-                                       modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(
-                                               horizontal = 10.dp,
-                                               vertical = 5.dp
-                                           ),
-                                       shape = RoundedCornerShape(10.dp)
-                                   ) {
-                                       Text(
-                                           text = ingredient,
-                                           fontSize = 17.sp,
-                                           textAlign = TextAlign.Center,
-                                           modifier = Modifier
-                                               .fillMaxWidth()
-                                               .padding(
-                                                   vertical = 20.dp
-                                               )
-                                       )
-                                   }
-                               }*/
-
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacing between chips horizontally
-                                verticalArrangement = Arrangement.spacedBy(8.dp)     // Spacing between lines vertically
-                            ) {
-                                response.ingredients.forEach { ingredient ->
-                                    RecipeChip(
-                                        isClickable = false,
-                                        text = ingredient,
+                                {
+                                    Text(
+                                        modifier = Modifier.padding(bottom = 12.dp),
+                                        text = "Tags",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 30.sp
                                     )
+
+                                    Spacer(
+                                        modifier = Modifier.height(8.dp),
+                                    )
+
+                                    FlowRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        response.tags.forEach { tags ->
+                                            RecipeChip(
+                                                isClickable = false,
+                                                text = tags,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -258,7 +274,8 @@ fun DetailScreen(
             }
         }
     }
-}
+
+
 
 //    if (state.isLoading) {
 //        CircularProgressIndicator(

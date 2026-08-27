@@ -67,6 +67,10 @@ fun NavigationStack() {
                                 )
                             }
                         }
+
+                        else -> {
+                            HomeEffects.ShowToast("Recipe not found")
+                        }
                     }
                 }
             }

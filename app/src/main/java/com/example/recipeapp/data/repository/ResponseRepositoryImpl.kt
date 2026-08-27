@@ -14,19 +14,26 @@ class ResponseRepositoryImpl(
     private var cachedRecipes: List<Response>? = null
 
     override suspend fun responses(): List<Response>? {
-        return cachedRecipes ?: run {
-            val response = api.getRecipe()
-            val list = response.body()?.recipes?.toDomainList()
-            cachedRecipes = list
-            list
+
+        cachedRecipes?.let {
+            return it
         }
+
+        val response = api.getRecipe()
+
+        if (!response.isSuccessful) {
+            throw Exception("Something went wrong: ${response.code()}")
+        }
+
+        val list = response.body()?.recipes?.toDomainList()
+            ?: throw Exception("No recipes found")
+
+        cachedRecipes = list
+
+        return list
     }
 
     override suspend fun getResponseById(id: String): Response? {
         return cachedRecipes?.find { it.id == id }
-
-//        val response = api.getRecipeById(id)
-//        return response.body()?.toDomain()
     }
-
 }

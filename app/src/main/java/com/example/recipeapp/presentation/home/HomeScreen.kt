@@ -33,10 +33,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.recipeapp.domain.model.FoodTypes
 import com.example.recipeapp.shared.components.RecipeChip
 import com.example.recipeapp.shared.components.TrendingRecipeCard
 
@@ -44,6 +44,7 @@ import com.example.recipeapp.shared.components.TrendingRecipeCard
 fun HomeScreen(
     uiState: HomeState = HomeState(),
     onIntent: (HomeIntent) -> Unit = {}
+
 ) {
     val response = remember(uiState.allRecipes) {
         uiState.allRecipes.randomOrNull()
@@ -56,74 +57,118 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color.LightGray
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
             when {
+
                 uiState.isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize()
+                        .padding(paddingValues),
+                        contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
+                uiState.error != null -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center){
+                        Text(
+                            text = uiState.error,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Red
+                        )
+
+                    }
+                }
+                else->{}
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Discover Best Recipes",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingValues)
-                    .padding(top = 50.dp),
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(15.dp))
+//            Text(
+//                text = "Discover Best Recipes",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(paddingValues)
+//                    .padding(top = 50.dp),
+//                color = Color.Black,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 30.sp,
+//                textAlign = TextAlign.Center,
+//            )
+//            Spacer(modifier = Modifier.height(15.dp))
 
-            TextField(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                value = uiState.searchQueryFlow,
-                maxLines = 1,
-                onValueChange = { onIntent(HomeIntent.SearchUpdate(it)) },
-                placeholder = {
-                    Text("Search any Recipe")
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                trailingIcon = {
-                    IconButton(onClick = {
-                        onIntent(
-                            HomeIntent.SearchRecipe(uiState.searchQueryFlow)
-                        )
-                    }) {
-                        Icon(
-                            painter = painterResource(
-                                android.R.drawable.ic_menu_search
-                            ), contentDescription = null
-                        )
-                    }
-                }
-            )
-            Spacer(modifier = Modifier.height(18.dp))
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 20.dp)
             ) {
 
-                items(FoodTypes.entries){foodType ->
+                TextField(
+                    modifier = Modifier.padding(vertical = 20.dp).fillMaxWidth(),
+                    value = uiState.searchQueryFlow,
+                    maxLines = 1,
+                    onValueChange = {
+                        onIntent(HomeIntent.SearchUpdate(it))
+                    },
+                    placeholder = {
+                        Text("Search any Recipe")
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                onIntent(
+                                    HomeIntent.SearchRecipe(
+                                        uiState.searchQueryFlow
+                                    )
+                                )
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    android.R.drawable.ic_menu_search
+                                ),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                )
+
+                if (uiState.isSearching && uiState.trendingRecipes.isEmpty()) {
+                    Text(
+                        text = "Recipe not found",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Red,
+                        modifier = Modifier.padding(
+                            start = 8.dp,
+                            top = 6.dp
+                        )
+                    )
+                }
+            }
+            LazyRow(
+                modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                items(FoodTypes.entries){ foodType ->
                     RecipeChip(
                         text = foodType.value,
-//                        selected = uiState.searchQueryFlow.isBlank(),
                         selected = foodType ==  uiState.selectedFoodType,
                         onClick = {
                             onIntent(
@@ -132,58 +177,12 @@ fun HomeScreen(
                         }
                     )
                 }
-
-               /* item {
-                    RecipeChip(
-                        text = "All",
-                        selected = uiState.searchQueryFlow.isBlank(),
-                        onClick = {
-                            onIntent(
-                                HomeIntent.SearchUpdate("")
-                            )
-                        }
-                    )
-                }
-
-                item {
-                    RecipeChip(
-                        text = "Italian",
-                        selected = false,
-                        onClick = {
-                            onIntent(
-                                HomeIntent.SearchUpdate("Italian")
-                            )
-                        }
-                    )
-                }
-                item {
-                    RecipeChip(
-                        text = "Healthy",
-                        selected = false,
-                        onClick = {
-                            onIntent(
-                                HomeIntent.SearchUpdate("Healthy")
-                            )
-                        }
-                    )
-                }
-                item {
-                    RecipeChip(
-                        text = "Dessert",
-                        selected = false,
-                        onClick = {
-                            onIntent(
-                                HomeIntent.SearchUpdate("Dessert")
-                            )
-                        }
-                    )
-                }*/
             }
-            Spacer(modifier = Modifier.height(26.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                   .padding(horizontal = 20.dp)
             ) {
                 Text(
                     text = "Just For You",
@@ -193,7 +192,7 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 30.dp)
+                        .padding(vertical = 10.dp)
                 ) {
                     AsyncImage(
                         modifier = Modifier
@@ -266,11 +265,11 @@ fun HomeScreen(
                     text = "Trending Recipes",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 25.dp)
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
 
 
@@ -300,7 +299,6 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
         }
-
     }
 }
 

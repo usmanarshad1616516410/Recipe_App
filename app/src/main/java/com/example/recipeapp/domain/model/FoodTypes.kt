@@ -1,4 +1,4 @@
-package com.example.recipeapp.presentation.home
+package com.example.recipeapp.domain.model
 
 enum class FoodTypes(
     val value: String
@@ -7,5 +7,4 @@ enum class FoodTypes(
     ITALIAN("Italian"),
     HEALTHY("Healthy"),
     DESERT("Desert")
-
 }

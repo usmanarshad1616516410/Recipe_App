@@ -6,5 +6,6 @@ data class DetailState(
     val response: Response? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val selectedIngredientIndex: Int? = null
+    val selectedIngredientIndex: Int? = null,
+    val selectedTagsIndex : Int? =null
 )

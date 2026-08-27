@@ -1,5 +1,6 @@
 package com.example.recipeapp.presentation.home
 
+import com.example.recipeapp.domain.model.FoodTypes
 import com.example.recipeapp.domain.model.Response
 
 data class HomeState(
@@ -7,7 +8,7 @@ data class HomeState(
     val trendingRecipes: List<Response> = emptyList(),
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
-    val error: String? = null,
+    val error: String? = "No Internet Connection",
     val searchQueryFlow: String = "",
     val selectedFoodType: FoodTypes = FoodTypes.ALL
 )

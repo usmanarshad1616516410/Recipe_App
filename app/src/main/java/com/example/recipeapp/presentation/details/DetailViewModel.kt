@@ -19,6 +19,7 @@ class DetailViewModel(
         when (intent) {
             is DetailIntent.LoadRecipe -> loadRecipe(intent.id)
             is DetailIntent.IngredientClick -> onIngredientClick(intent.index)
+            is DetailIntent.TagsClick ->onIntent(intent)
         }
     }
     private fun loadRecipe(id: String) {
@@ -42,5 +43,12 @@ class DetailViewModel(
             )
         }
     }
+//    private fun tags(index: Int){
+//        _state.update { current ->
+//            current.copy(
+//                selectedTagsIndex = if(current.selectedTagsIndex == index)null else index
+//            )
+//        }
+//    }
 }
 

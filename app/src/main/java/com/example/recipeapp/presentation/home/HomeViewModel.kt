@@ -2,6 +2,7 @@ package com.example.recipeapp.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.recipeapp.domain.model.FoodTypes
 import com.example.recipeapp.domain.repsitory.ResponseRepository
 import com.example.recipeapp.presentation.home.HomeEffects.NavigateToDetailScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 class HomeViewModel(
     private val repository: ResponseRepository
 ) : ViewModel() {
@@ -57,16 +57,26 @@ class HomeViewModel(
                 val recipe = state.value.allRecipes.firstOrNull {
                     it.id == intent.responseId
                 }
-
                 viewModelScope.launch {
-                    _effects.emit(
-                        NavigateToDetailScreen(recipe)
-                    )
+
+                    if (recipe != null) {
+
+                        _effects.emit(
+                            NavigateToDetailScreen(recipe)
+                        )
+
+                    } else {
+
+                        _state.update {
+                            it.copy(
+                                error = "Recipe not found"
+                            )
+                        }
+                    }
                 }
             }
 
             is HomeIntent.FoodTypeClicked -> {
-
 
                 val filteredRecipes = if (intent.foodType == FoodTypes.ALL) {
                     state.value.allRecipes
@@ -89,38 +99,30 @@ class HomeViewModel(
             }
         }
     }
-
     private fun getRecipeByName(recipeName: String) {
-
         if (recipeName.isBlank()) return
-
         val recipe = state.value.allRecipes.firstOrNull {
             it.title.contains(
                 recipeName,
                 ignoreCase = true
             )
         }
-
         viewModelScope.launch {
             _effects.emit(
-                HomeEffects.NavigateToDetailScreen(recipe)
+                NavigateToDetailScreen(recipe)
             )
         }
     }
-
     private fun fetchRecipes() {
 
         viewModelScope.launch {
-
             _state.value = state.value.copy(
                 isLoading = true,
                 error = null
             )
-
             try {
-
-                val responses = repository.responses().orEmpty()
-
+                val responses = repository.responses()
+                    ?: throw Exception("No recipes found")
                 _state.update {
                     it.copy(
                         allRecipes = responses,
@@ -131,11 +133,14 @@ class HomeViewModel(
                 }
 
             } catch (e: Exception) {
-
-                _state.value = state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "No Internet Connection"
-                )
+                _state.update {
+                    it.copy(
+                        allRecipes = emptyList(),
+                        trendingRecipes = emptyList(),
+                        isLoading = false,
+                        error = e.message ?: "No Internet Connection"
+                    )
+                }
             }
         }
     }
