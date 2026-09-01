@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 class HomeViewModel(
     private val repository: ResponseRepository
 ) : ViewModel() {
@@ -27,6 +28,14 @@ class HomeViewModel(
     fun onIntent(intent: HomeIntent) {
 
         when (intent) {
+            is HomeIntent.ClearError -> {
+
+                _state.update {
+                    it.copy(
+                        error = null
+                    )
+                }
+            }
 
             is HomeIntent.SearchUpdate -> {
 
@@ -95,7 +104,6 @@ class HomeViewModel(
                         trendingRecipes = filteredRecipes,
                     )
                 }
-
             }
         }
     }
@@ -108,21 +116,37 @@ class HomeViewModel(
             )
         }
         viewModelScope.launch {
-            _effects.emit(
-                NavigateToDetailScreen(recipe)
-            )
+            if (recipe != null) {
+                _effects.emit(
+                    NavigateToDetailScreen(recipe)
+                )
+            } else {
+
+                _state.update {
+                    it.copy(
+                        error = "Recipe not found"
+                    )
+                }
+            }
         }
     }
+
     private fun fetchRecipes() {
 
         viewModelScope.launch {
-            _state.value = state.value.copy(
-                isLoading = true,
-                error = null
-            )
+
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
+            }
+
             try {
+
                 val responses = repository.responses()
                     ?: throw Exception("No recipes found")
+
                 _state.update {
                     it.copy(
                         allRecipes = responses,
@@ -132,13 +156,14 @@ class HomeViewModel(
                     )
                 }
 
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+
                 _state.update {
                     it.copy(
                         allRecipes = emptyList(),
                         trendingRecipes = emptyList(),
                         isLoading = false,
-                        error = e.message ?: "No Internet Connection"
+                        error = "No Internet Connection"
                     )
                 }
             }

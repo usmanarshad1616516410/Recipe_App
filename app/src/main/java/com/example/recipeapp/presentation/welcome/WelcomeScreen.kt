@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,10 +35,13 @@ fun WelcomeScreen(onIntent: (WelcomeIntent) -> Unit) {
                     onIntent(WelcomeIntent.GoToHome)
                 },
                 backgroundColor = Color(0xFF25AE87),
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 35.dp)
+                modifier = Modifier
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 35.dp
+                    )
+                    .navigationBarsPadding()
             )
 
 

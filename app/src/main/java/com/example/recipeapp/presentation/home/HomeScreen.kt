@@ -18,12 +18,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,12 +43,18 @@ import com.example.recipeapp.domain.model.FoodTypes
 import com.example.recipeapp.shared.components.RecipeChip
 import com.example.recipeapp.shared.components.TrendingRecipeCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: HomeState = HomeState(),
     onIntent: (HomeIntent) -> Unit = {}
 
 ) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    val showErrorSheet = uiState.error != null
     val response = remember(uiState.allRecipes) {
         uiState.allRecipes.randomOrNull()
     }
@@ -55,35 +64,22 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Color.LightGray
+        containerColor = Color.White
     ) { paddingValues ->
-            when {
+        when {
 
-                uiState.isLoading -> {
-                    Box(modifier = Modifier.fillMaxSize()
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
                         .padding(paddingValues),
-                        contentAlignment = Alignment.Center) {
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
-                uiState.error != null -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center){
-                        Text(
-                            text = uiState.error,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Red
-                        )
-
-                    }
-                }
-                else->{}
         }
 
         Column(
@@ -93,19 +89,6 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//            Text(
-//                text = "Discover Best Recipes",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(paddingValues)
-//                    .padding(top = 50.dp),
-//                color = Color.Black,
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 30.sp,
-//                textAlign = TextAlign.Center,
-//            )
-//            Spacer(modifier = Modifier.height(15.dp))
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,17 +96,24 @@ fun HomeScreen(
             ) {
 
                 TextField(
-                    modifier = Modifier.padding(vertical = 20.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                        .fillMaxWidth(),
                     value = uiState.searchQueryFlow,
                     maxLines = 1,
                     onValueChange = {
                         onIntent(HomeIntent.SearchUpdate(it))
                     },
                     placeholder = {
+
                         Text("Search any Recipe")
+
+
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF8F9F5),
+                        unfocusedContainerColor = Color(0xFFF8F9F5),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent
@@ -147,29 +137,18 @@ fun HomeScreen(
                         }
                     }
                 )
-
-                if (uiState.isSearching && uiState.trendingRecipes.isEmpty()) {
-                    Text(
-                        text = "Recipe not found",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Red,
-                        modifier = Modifier.padding(
-                            start = 8.dp,
-                            top = 6.dp
-                        )
-                    )
-                }
             }
             LazyRow(
-                modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
 
-                items(FoodTypes.entries){ foodType ->
+                items(FoodTypes.entries) { foodType ->
                     RecipeChip(
                         text = foodType.value,
-                        selected = foodType ==  uiState.selectedFoodType,
+                        selected = foodType == uiState.selectedFoodType,
                         onClick = {
                             onIntent(
                                 HomeIntent.FoodTypeClicked(foodType)
@@ -182,7 +161,7 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                   .padding(horizontal = 20.dp)
+                    .padding(horizontal = 20.dp)
             ) {
                 Text(
                     text = "Just For You",
@@ -296,10 +275,51 @@ fun HomeScreen(
                     )
                 }
             }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
 
-            Spacer(modifier = Modifier.height(30.dp))
+                if (showErrorSheet) {
+
+                    ModalBottomSheet(
+                        onDismissRequest = {
+                            onIntent(HomeIntent.ClearError)
+                        },
+                        sheetState = sheetState
+                    ) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            Text(
+                                text = uiState.error,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            Text(
+                                text = "Please try again."
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
+
 
 

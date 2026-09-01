@@ -93,7 +93,6 @@ fun NavigationStack() {
                     DetailIntent.LoadRecipe(route.recipeId)
                 )
             }
-
             DetailScreen(
                 state = state
             )

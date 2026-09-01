@@ -43,12 +43,5 @@ class DetailViewModel(
             )
         }
     }
-//    private fun tags(index: Int){
-//        _state.update { current ->
-//            current.copy(
-//                selectedTagsIndex = if(current.selectedTagsIndex == index)null else index
-//            )
-//        }
-//    }
 }
 

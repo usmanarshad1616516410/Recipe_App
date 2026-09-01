@@ -19,6 +19,7 @@ fun RecipeChip(
     selected: Boolean = false,
     isClickable: Boolean = true,
     shape: Shape = RoundedCornerShape(50.dp),
+    textColor: Color = Color.White,
     onClick: () -> Unit = {}
 ) {
 
@@ -35,9 +36,9 @@ fun RecipeChip(
         ),
         shape = shape,
         color = if (selected || isClickable.not()) {
-            Color(0xFFE4E8D8)
+            Color.Black
         } else {
-            Color.White
+            Color(0xFFE2E4E6)
         },
         border = if (!selected) {
             BorderStroke(1.dp, Color(0xFFE0E0E0))
@@ -53,7 +54,8 @@ fun RecipeChip(
                 vertical = 8.dp
             ),
             fontSize = 13.sp,
-            color = Color(0xFF333333)
+            color = textColor,
+
         )
     }
 }
