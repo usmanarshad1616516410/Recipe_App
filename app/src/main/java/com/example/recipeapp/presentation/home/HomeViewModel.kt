@@ -20,11 +20,9 @@ class HomeViewModel(
     private val _effects = MutableSharedFlow<HomeEffects>()
     val effects = _effects.asSharedFlow()
 
-
     init {
         fetchRecipes()
     }
-
     fun onIntent(intent: HomeIntent) {
 
         when (intent) {
@@ -107,6 +105,7 @@ class HomeViewModel(
             }
         }
     }
+
     private fun getRecipeByName(recipeName: String) {
         if (recipeName.isBlank()) return
         val recipe = state.value.allRecipes.firstOrNull {
