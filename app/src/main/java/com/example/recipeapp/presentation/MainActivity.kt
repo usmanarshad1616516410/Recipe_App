@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         ).isAppearanceLightNavigationBars = false
 
         setContent {
-            NavigationStack()
+            NavigationStack(this)
         }
     }
 }
