@@ -1,84 +1,80 @@
 package com.example.recipeapp.presentation.home
 
-import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
-import com.example.recipeapp.navigation.Routes
-import org.koin.compose.viewmodel.koinViewModel
+import com.example.recipeapp.domain.model.FoodTypes
+import com.example.recipeapp.shared.components.RecipeChip
+import com.example.recipeapp.shared.components.TrendingRecipeCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavHostController,
-    viewModel: HomeViewModel = koinViewModel(),
+    uiState: HomeState = HomeState(),
+    onIntent: (HomeIntent) -> Unit = {}
 
-    ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
-    val featuredMeal = remember(state.trendingRecipes) {
-        state.trendingRecipes.randomOrNull()
+    val showErrorSheet = uiState.error != null
+    val response = remember(uiState.allRecipes) {
+        uiState.allRecipes.randomOrNull()
     }
-
-    val context = LocalContext.current
-
-    LaunchedEffect(viewModel.effects) {
-        viewModel.effects.collect {
-            when (it) {
-                is HomeEffects.NavigateToDetailScreen -> {
-                    it.recipe?.let { meal ->
-                        navController.navigate(Routes.Detail(meal.id))
-                    } ?: run {
-                        Toast.makeText(context, "No such recipe right now", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }
-
-        }
-    }
+    val totalTime =
+        (response?.prepTimeMinutes ?: 0) +
+                (response?.cookTimeMinutes ?: 0)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Color.LightGray
+        containerColor = Color.White
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                state.isLoading -> {
+        when {
+
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -89,59 +85,83 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Discover Best Recipes",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingValues)
-                    .padding(top = 50.dp),
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 30.sp,
-                textAlign = TextAlign.Center,
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-
-            TextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                value = state.searchQueryFlow,
-                maxLines = 1,
-                onValueChange = { viewModel.onIntent(HomeIntent.SearchUpdate(it)) },
-                placeholder = {
-                    Text("Search any Recipe")
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                trailingIcon = {
-                    IconButton(onClick = {
-                        viewModel.onIntent(
-                            intent = HomeIntent.SearchRecipe(
-                                state.searchQueryFlow
-                            )
-                        )
-                    }) {
-                        Icon(
-                            painter = painterResource(
-                                android.R.drawable.ic_menu_search
-                            ), contentDescription = null
-                        )
-                    }
-                }
-
-            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(horizontal = 20.dp)
+            ) {
+
+                TextField(
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                        .fillMaxWidth(),
+                    value = uiState.searchQueryFlow,
+                    maxLines = 1,
+                    onValueChange = {
+                        onIntent(HomeIntent.SearchUpdate(it))
+                    },
+                    placeholder = {
+
+                        Text("Search any Recipe")
+
+
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF8F9F5),
+                        unfocusedContainerColor = Color(0xFFF8F9F5),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                onIntent(
+                                    HomeIntent.SearchRecipe(
+                                        uiState.searchQueryFlow
+                                    )
+                                )
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    android.R.drawable.ic_menu_search
+                                ),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                )
+            }
+            LazyRow(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+
+                items(FoodTypes.entries) { foodType ->
+                    RecipeChip(
+                        text = foodType.value,
+                        selected = foodType == uiState.selectedFoodType,
+                        onClick = {
+                            onIntent(
+                                HomeIntent.FoodTypeClicked(foodType)
+                            )
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             ) {
                 Text(
                     text = "Just For You",
@@ -151,40 +171,72 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 30.dp)
+                        .padding(vertical = 10.dp)
                 ) {
                     AsyncImage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navController.navigate(
-                                    Routes.Detail(recipeId = featuredMeal?.id ?: "")
-                                )
+                                response?.let {
+                                    onIntent(
+                                        HomeIntent.ItemClick(
+                                            responseId = it.id
+                                        )
+                                    )
+                                }
+
                             }
                             .clip(shape = RoundedCornerShape(10.dp)),
-                        model = featuredMeal?.imageUrl,
+                        model = response?.imageUrl,
                         contentDescription = null,
-
-                        )
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .fillMaxSize(0.6f)
+                            .height(100.dp)
                             .align(Alignment.BottomCenter)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.8f),
+                                        Color.Black,
+                                    )
+                                )
+                            )
                     )
 
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+
+                    ) {
+
+                        Text(
+                            text = "⭐ ${response?.rating}",
+                            color = Color.White,
+                            fontSize = 13.sp
+                        )
+
+                        Text(
+                            text = "🕒 $totalTime min",
+                            color = Color.White,
+                            fontSize = 13.sp
+                        )
+                    }
                     Text(
-                        text = featuredMeal?.name ?: String(),
+                        text = response?.title ?: String(),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
+                            .align(Alignment.BottomStart)
                             .padding(20.dp)
                     )
                 }
             }
-
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -192,32 +244,82 @@ fun HomeScreen(
                     text = "Trending Recipes",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 25.dp)
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }
+
             Spacer(modifier = Modifier.height(10.dp))
+
+
+
             LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(items = state.trendingRecipes) { item ->
-                    AsyncImage(
-                        contentDescription = null,
-                        model = item.imageUrl,
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp, vertical = 20.dp)
-                            .size(210.dp)
-                            .clip(shape = RoundedCornerShape(10.dp))
-                            .clickable {
-                                navController.navigate (
-                                    Routes.Detail(recipeId = item.id)
+
+                items(
+                    items = uiState.trendingRecipes,
+                    key = { it.id }
+                ) { item ->
+
+                    TrendingRecipeCard(
+                        title = item.title,
+                        imageUrl = item.imageUrl,
+                        onClick = {
+                            onIntent(
+                                HomeIntent.ItemClick(
+                                    responseId = item.id
                                 )
-                            }
+                            )
+                        }
                     )
+                }
+            }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+
+                if (showErrorSheet) {
+
+                    ModalBottomSheet(
+                        onDismissRequest = {
+                            onIntent(HomeIntent.ClearError)
+                        },
+                        sheetState = sheetState
+                    ) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            Text(
+                                text = uiState.error,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            Text(
+                                text = "Please try again."
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(24.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-
 }
+
+
+
+

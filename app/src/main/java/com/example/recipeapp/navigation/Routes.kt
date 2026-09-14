@@ -1,8 +1,9 @@
 package com.example.recipeapp.navigation
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 @Serializable
-sealed interface Routes{
+sealed interface Routes : NavKey {
     @Serializable
     data object Welcome: Routes
     @Serializable
