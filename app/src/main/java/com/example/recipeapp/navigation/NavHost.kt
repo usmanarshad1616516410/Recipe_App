@@ -24,7 +24,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun NavigationStack(
     context: Context
 ) {
-
     val backStack = rememberNavBackStack(Routes.Welcome)
 
     NavDisplay(

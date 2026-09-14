@@ -17,7 +17,9 @@ class ResponseRepositoryImpl(
             return it
         }
         val response = api.getRecipe()
-
+        if (!response.isSuccessful) {
+            throw Exception("Request failed: ${response.code()}")
+        }
         val list = response.body()?.recipes?.toDomainList()
             ?: throw Exception("No recipes found")
 

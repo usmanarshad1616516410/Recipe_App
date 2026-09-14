@@ -8,7 +8,7 @@ data class HomeState(
     val trendingRecipes: List<Response> = emptyList(),
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
-    val error: String? = "No Internet Connection",
+    val error: String? = null,
     val searchQueryFlow: String = "",
     val selectedFoodType: FoodTypes = FoodTypes.ALL
 )

@@ -15,11 +15,9 @@ data class RecipeDto(
     val tags: List<String>,
     val mealType: List<String>
 )
-
 data class RecipeListDto(
     val recipes: List<RecipeDto>
 )
-
 fun RecipeDto.toDomain(): Response {
     return Response(
         id = this.id.toString(),
